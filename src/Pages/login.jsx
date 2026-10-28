@@ -1,18 +1,43 @@
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { GraduationCap, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Eye, EyeOff, GraduationCap, Lock, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { demoUsers, getUserRolePath } from '../services/mockAuth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { user, login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("admin");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleLogin(e) {
-    e.preventDefault();
-    navigate(`/${role}`);
+  useEffect(() => {
+    if (user) {
+      navigate(getUserRolePath(user.role), { replace: true });
+    }
+  }, [navigate, user]);
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    setError('');
+
+    if (!role || !email.trim() || !password.trim()) {
+      setError('Please choose a role and enter both email and password.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const authenticatedUser = await login(email, password, role);
+      navigate(getUserRolePath(authenticatedUser.role), { replace: true });
+    } catch (loginError) {
+      setError(loginError.message || 'Unable to log in. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -22,14 +47,30 @@ export default function Login() {
           <GraduationCap size={36} />
         </div>
 
-        <h1 className="text-center text-3xl font-bold text-[#0B1F4D]">
-          Welcome Back
-        </h1>
-        <p className="mt-2 text-center text-sm text-gray-500">
-          Digital Attendance System
-        </p>
+        <h1 className="text-center text-3xl font-bold text-[#0B1F4D]">Welcome Back</h1>
+        <p className="mt-2 text-center text-sm text-gray-500">Digital Attendance System</p>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-5">
+          <div>
+            <label htmlFor="role" className="mb-2 block text-sm font-semibold text-gray-700">
+              Login As
+            </label>
+            <select
+              id="role"
+              value={role}
+              onChange={(event) => setRole(event.target.value)}
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-[#0B1F4D]"
+              required
+            >
+              <option value="">Select your role</option>
+              {[...new Set(demoUsers.map((item) => item.role))].map((itemRole) => (
+                <option key={itemRole} value={itemRole}>
+                  {itemRole.charAt(0).toUpperCase() + itemRole.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label htmlFor="email" className="mb-2 block text-sm font-semibold text-gray-700">
               Email Address
@@ -39,11 +80,11 @@ export default function Login() {
               <input
                 id="email"
                 type="email"
-                required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
                 className="w-full py-3 outline-none"
+                autoComplete="email"
               />
             </div>
           </div>
@@ -56,16 +97,16 @@ export default function Login() {
               <Lock size={19} className="text-gray-400" />
               <input
                 id="password"
-                type={showPassword ? "text" : "password"}
-                required
+                type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
                 className="w-full py-3 outline-none"
+                autoComplete="current-password"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword((value) => !value)}
                 className="text-gray-500"
                 aria-label="Toggle password visibility"
               >
@@ -74,34 +115,34 @@ export default function Login() {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="role" className="mb-2 block text-sm font-semibold text-gray-700">
-              Demo role
-            </label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 outline-none focus:border-[#0B1F4D]"
-            >
-              <option value="admin">Admin</option>
-              <option value="teacher">Teacher</option>
-              <option value="student">Student</option>
-            </select>
-          </div>
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-[#0B1F4D] py-3.5 font-semibold text-white transition hover:bg-[#16346F]"
+            disabled={isSubmitting}
+            className="w-full rounded-xl bg-[#0B1F4D] py-3.5 font-semibold text-white transition hover:bg-[#16346F] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Login to Dashboard
+            {isSubmitting ? 'Logging in...' : 'Login to Dashboard'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-xs leading-5 text-gray-500">
-          Demo only: this frontend redirects by role and does not authenticate
-          users or protect dashboard routes.
-        </p>
+        <div className="mt-6 rounded-2xl bg-[#F5F7FB] p-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0B1F4D]">
+            Demo accounts
+          </p>
+          <ul className="space-y-2 text-sm text-gray-600">
+            {demoUsers.map((item) => (
+              <li key={item.email} className="flex items-center justify-between gap-3">
+                <span className="font-medium capitalize">{item.role}</span>
+                <span className="text-right text-xs">{item.email} / {item.password}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
