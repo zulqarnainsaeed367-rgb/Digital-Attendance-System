@@ -1,7 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import { createContext, useContext, useMemo, useState } from 'react';
-import { getStoredUser, getUserRolePath, login as loginUser, logout as logoutUser } from '../services/mockAuth';
+import {
+  getStoredUser,
+  getUserRolePath,
+  login as loginUser,
+  logout as logoutUser,
+  register as registerUser,
+} from '../services/mockAuth';
 
 const AuthContext = createContext(null);
 
@@ -15,6 +21,12 @@ export function AuthProvider({ children }) {
     return authenticatedUser;
   };
 
+  const register = async (name, email, password, role) => {
+    const registeredUser = registerUser(name, email, password, role);
+    setUser(registeredUser);
+    return registeredUser;
+  };
+
   const logout = () => {
     logoutUser();
     setUser(null);
@@ -25,6 +37,7 @@ export function AuthProvider({ children }) {
       user,
       isReady,
       login,
+      register,
       logout,
       rolePath: getUserRolePath,
     }),

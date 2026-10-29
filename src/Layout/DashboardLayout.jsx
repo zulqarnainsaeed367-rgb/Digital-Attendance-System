@@ -7,7 +7,7 @@ export default function DashboardLayout({ role }) {
     <div className="flex min-h-screen flex-col bg-[#F5F7FB] md:flex-row">
       <Sidebar role={role} />
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 md:ml-64">
         <Navbar role={role} />
 
         <main className="p-4 sm:p-6">

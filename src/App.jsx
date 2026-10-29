@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import DashboardLayout from './Layout/DashboardLayout';
 import Login from './Pages/login';
+import Signup from './Pages/Signup';
 import AdminDashboard from './Pages/Admindashboard';
 import TeacherDashboard from './Pages/TeacherDashboard';
 import StudentDashboard from './Pages/studentDashboard';
@@ -28,6 +29,10 @@ function AppRoutes() {
       <Route
         path="/login"
         element={user ? <Navigate to={getUserRolePath(user.role)} replace /> : <Login />}
+      />
+      <Route
+        path="/signup"
+        element={user ? <Navigate to={getUserRolePath(user.role)} replace /> : <Signup />}
       />
 
       <Route element={<ProtectedRoute allowedRoles={['admin']} />}>

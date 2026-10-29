@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff, GraduationCap, Lock, Mail } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { demoUsers, getUserRolePath } from '../services/mockAuth';
 
@@ -129,6 +129,13 @@ export default function Login() {
             {isSubmitting ? 'Logging in...' : 'Login to Dashboard'}
           </button>
         </form>
+
+        <p className="mt-5 text-center text-sm text-gray-600">
+          Don&apos;t have an account?{' '}
+          <Link to="/signup" className="font-semibold text-[#0B1F4D] hover:underline">
+            Sign up
+          </Link>
+        </p>
 
         <div className="mt-6 rounded-2xl bg-[#F5F7FB] p-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0B1F4D]">
